@@ -24,7 +24,8 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "FINporterTabular",
-            targets: ["FINporterTabular"]),
+            targets: ["FINporterTabular"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/openalloc/FINporter.git", from: "1.1.0"),
@@ -37,11 +38,13 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "FINporterTabular",
-            dependencies: ["FINporter",],
-            path: "Sources"),
+            dependencies: ["FINporter"],
+            path: "Sources"
+        ),
         .testTarget(
             name: "FINporterTabularTests",
             dependencies: ["FINporterTabular"],
-            path: "Tests"),
+            path: "Tests"
+        ),
     ]
 )

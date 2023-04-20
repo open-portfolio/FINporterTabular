@@ -24,18 +24,18 @@ import FINporter
 final class TxnAllocTests: XCTestCase {
     var imp: Tabular!
     var rejectedRows: [AllocRowed.RawRow]!
-    
+
     override func setUpWithError() throws {
         imp = Tabular()
         rejectedRows = [AllocRowed.RawRow]()
     }
-    
+
     func testSourceFormats() {
         let expected = Set([AllocFormat.CSV, AllocFormat.TSV])
         let actual = Set(imp.sourceFormats)
         XCTAssertEqual(expected, actual)
     }
-    
+
     func testTargetSchema() {
         let expected: [AllocSchema] = [
             .allocAccount,
@@ -51,7 +51,7 @@ final class TxnAllocTests: XCTestCase {
         let actual = imp.outputSchemas
         XCTAssertEqual(Set(expected), Set(actual))
     }
-    
+
     func testDetectFailsDueToHeaderMismatch() throws {
         let badHeader = """
         lesterstoryAccountID,txnSecurityID
@@ -60,7 +60,7 @@ final class TxnAllocTests: XCTestCase {
         let actual = try imp.detect(dataPrefix: badHeader.data(using: .utf8)!)
         XCTAssertEqual(expected, actual)
     }
-    
+
     func testDetectSucceeds() throws {
         let header = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount
@@ -69,7 +69,7 @@ final class TxnAllocTests: XCTestCase {
         let actual = try imp.detect(dataPrefix: header.data(using: .utf8)!)
         XCTAssertEqual(expected, actual)
     }
-    
+
     func testDetectSucceedsWithoutOptionals() throws {
         let header = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount
@@ -78,7 +78,7 @@ final class TxnAllocTests: XCTestCase {
         let actual = try imp.detect(dataPrefix: header.data(using: .utf8)!)
         XCTAssertEqual(expected, actual)
     }
-    
+
     func testDetectViaMain() throws {
         let header = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount
@@ -93,7 +93,7 @@ final class TxnAllocTests: XCTestCase {
             XCTAssertEqual(expected, value)
         }
     }
-    
+
     func testParseRejectBadAction() throws {
         let csv = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount
@@ -103,7 +103,7 @@ final class TxnAllocTests: XCTestCase {
         let _: [AllocRowed.DecodedRow] = try imp.decode(MTransaction.self, dataStr, rejectedRows: &rejectedRows, inputFormat: .CSV)
         XCTAssertEqual(1, rejectedRows.count)
     }
-    
+
     func testParseRejectBadTransactedAt() throws {
         let csv = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount
@@ -113,7 +113,7 @@ final class TxnAllocTests: XCTestCase {
         let _: [AllocRowed.DecodedRow] = try imp.decode(MTransaction.self, dataStr, rejectedRows: &rejectedRows, inputFormat: .CSV)
         XCTAssertEqual(1, rejectedRows.count)
     }
-    
+
     func testParseNoRejectBadAccountNumber() throws {
         let csv = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount
@@ -123,7 +123,7 @@ final class TxnAllocTests: XCTestCase {
         let _: [AllocRowed.DecodedRow] = try imp.decode(MTransaction.self, dataStr, rejectedRows: &rejectedRows, inputFormat: .CSV)
         XCTAssertEqual(0, rejectedRows.count)
     }
-    
+
     func testParseNoRejectBadSecurityID() throws {
         let csv = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount
@@ -133,7 +133,7 @@ final class TxnAllocTests: XCTestCase {
         let _: [AllocRowed.DecodedRow] = try imp.decode(MTransaction.self, dataStr, rejectedRows: &rejectedRows, inputFormat: .CSV)
         XCTAssertEqual(0, rejectedRows.count)
     }
-    
+
     func testParseNoRejectBadSharePrice() throws {
         let csv = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount
@@ -143,7 +143,7 @@ final class TxnAllocTests: XCTestCase {
         let _: [AllocRowed.DecodedRow] = try imp.decode(MTransaction.self, dataStr, rejectedRows: &rejectedRows, inputFormat: .CSV)
         XCTAssertEqual(0, rejectedRows.count)
     }
-    
+
     func testParseNoRejectBadShareCount() throws {
         let csv = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount
@@ -153,7 +153,7 @@ final class TxnAllocTests: XCTestCase {
         let _: [AllocRowed.DecodedRow] = try imp.decode(MTransaction.self, dataStr, rejectedRows: &rejectedRows, inputFormat: .CSV)
         XCTAssertEqual(0, rejectedRows.count)
     }
-    
+
     func testParseAccepted() throws {
         let csv = """
         txnAction,txnTransactedAt,txnAccountID,txnSecurityID,txnLotID,txnSharePrice,txnShareCount,realizedGainLong,realizedGainShort
@@ -162,18 +162,18 @@ final class TxnAllocTests: XCTestCase {
         let dataStr = csv.data(using: .utf8)!
         let actual: [AllocRowed.DecodedRow] = try imp.decode(MTransaction.self, dataStr, rejectedRows: &rejectedRows, inputFormat: .CSV)
         XCTAssertEqual(0, rejectedRows.count)
-        
+
         let timestamp = MTransaction.parseDate("2020-12-31T00:00:00Z")!
-        
+
         let expected: AllocRowed.DecodedRow = ["realizedGainShort": 7.0,
-                                          "realizedGainLong": 5.0,
-                                          "txnAction": MTransaction.Action.buysell,
-                                          "txnAccountID": "1",
-                                          "txnSecurityID": "SPY",
-                                          "txnLotID": "X",
-                                          "txnShareCount": 3.0,
-                                          "txnSharePrice": 1.0,
-                                          "txnTransactedAt": timestamp]
+                                               "realizedGainLong": 5.0,
+                                               "txnAction": MTransaction.Action.buysell,
+                                               "txnAccountID": "1",
+                                               "txnSecurityID": "SPY",
+                                               "txnLotID": "X",
+                                               "txnShareCount": 3.0,
+                                               "txnSharePrice": 1.0,
+                                               "txnTransactedAt": timestamp]
         XCTAssertEqual([expected], actual)
     }
 }

@@ -143,10 +143,10 @@ final class AccountAllocTests: XCTestCase {
         let actual: [AllocRowed.DecodedRow] = try imp.decode(MAccount.self, dataStr, rejectedRows: &rejectedRows, inputFormat: .CSV)
         XCTAssertEqual(0, rejectedRows.count)
         let expected: AllocRowed.DecodedRow = ["accountID": "1",
-                                      "title": "X",
-                                      "isActive": true,
-                                      "isTaxable": true,
-                                      "canTrade": true]
+                                               "title": "X",
+                                               "isActive": true,
+                                               "isTaxable": true,
+                                               "canTrade": true]
         XCTAssertEqual([expected], actual)
     }
 }

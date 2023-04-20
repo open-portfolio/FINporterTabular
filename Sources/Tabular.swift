@@ -20,15 +20,15 @@
 import Foundation
 
 import AllocData
-import SwiftCSV
 import FINporter
+import SwiftCSV
 
 public class Tabular: FINporter {
     override public var name: String { "Tabular" }
     override public var id: String { "tabular" }
     override public var description: String { "Detect and decode schema-supported tabular documents." }
     override public var sourceFormats: [AllocFormat] { [.CSV, .TSV] }
-    override public var outputSchemas: [AllocSchema] {[
+    override public var outputSchemas: [AllocSchema] { [
         .allocAccount,
         .allocAllocation,
         .allocAsset,
@@ -38,7 +38,7 @@ public class Tabular: FINporter {
         .allocSecurity,
         .allocStrategy,
         .allocTracker,
-    ]}
+    ] }
 
     override public func detect(dataPrefix: Data) throws -> DetectResult {
         guard let str = FINporter.normalizeDecode(dataPrefix) else {
@@ -65,15 +65,16 @@ public class Tabular: FINporter {
         }
     }
 
-    override open func decode<T: AllocRowed>(_ type: T.Type,
-                                            _ data: Data,
-                                            rejectedRows: inout [T.RawRow],
-                                            inputFormat: AllocFormat? = nil,
-                                            outputSchema _: AllocSchema? = nil,
-                                            url: URL? = nil,
-                                            defTimeOfDay _: String? = nil,
-                                            timeZone _: TimeZone = TimeZone.current,
-                                            timestamp _: Date? = nil) throws -> [T.DecodedRow] {
+    override open func decode<T: AllocRowed>(_: T.Type,
+                                             _ data: Data,
+                                             rejectedRows: inout [T.RawRow],
+                                             inputFormat: AllocFormat? = nil,
+                                             outputSchema _: AllocSchema? = nil,
+                                             url: URL? = nil,
+                                             defTimeOfDay _: String? = nil,
+                                             timeZone _: TimeZone = TimeZone.current,
+                                             timestamp _: Date? = nil) throws -> [T.DecodedRow]
+    {
         guard let str = FINporter.normalizeDecode(data) else {
             throw FINporterError.decodingError("Unable to parse data.")
         }
