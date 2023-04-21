@@ -46,9 +46,10 @@ public class Tabular: FINporter {
         }
 
         return sourceFormats.reduce(into: [:]) { map, sourceFormat in
-            guard let delimiter = sourceFormat.delimiter else { return }
+            guard let delimiterChar = sourceFormat.delimiter else { return }
+            let delimiter = CSVDelimiter(unicodeScalarLiteral: delimiterChar)
             do {
-                let table = try CSV(string: str, delimiter: delimiter)
+                let table = try NamedCSV(string: String(str), delimiter: delimiter)
 
                 let documentSignature = AllocSchema.generateSignature(table.header)
 
@@ -85,8 +86,9 @@ public class Tabular: FINporter {
             throw FINporterError.decodingError("Unable to infer format (and delimiter) from url.")
         }
 
-        let rows = try CSV(string: str, delimiter: delimiter)
+        let delim = CSVDelimiter(unicodeScalarLiteral: delimiter)
+        let rows = try NamedCSV(string: str, delimiter: delim)
 
-        return try T.decode(rows.namedRows, rejectedRows: &rejectedRows)
+        return try T.decode(rows.rows, rejectedRows: &rejectedRows)
     }
 }
